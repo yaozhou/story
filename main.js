@@ -5,8 +5,8 @@ var util = require('util') ;
 
 
 //create database story;
-//create table story (id INT auto_increment, title varchar(1024), primary key(id)) DEFAULT CHARSET=utf8;
-//create table message (id INT auto_increment, content varchar(102400), story_id INT, primary key(id)) DEFAULT CHARSET=utf8;
+//create table story (id INT auto_increment, title varchar(1024), time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, primary key(id)) DEFAULT CHARSET=utf8;
+//create table message (id INT auto_increment, content varchar(102400), story_id INT, time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, primary key(id)) DEFAULT CHARSET=utf8;
 
 var mysql = require('mysql');
 

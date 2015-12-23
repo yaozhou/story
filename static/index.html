@@ -3,10 +3,14 @@
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
 <title>写自己的故事，让别人接龙去吧</title> 
-   <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
-<script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="style.css?body=1" rel="stylesheet" type="text/css" media="all">
+   <script type="text/javascript" src="jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="highcharts.js"></script>
 <!-- <script type="text/javascript" src="jquery.js?body=1"></script> 
- --><link href="bootstrap.css?body=1" rel="stylesheet">
+ -->
+ <link href="bootstrap.css?body=1" rel="stylesheet">
 <script src="bootstrap.js?body=1"></script>
 <script type="text/javascript"> 
 
@@ -174,7 +178,7 @@ function msg_add_request() {
 		function(data) {
 			 var ret = JSON.parse(data) ;
 			 if (ret.code == 0) {				
-				$("#text-container").append("<p>内容:" + $("#input_msg").val() + "</p>") ;
+				$("#msg-content").append("<p>" + $("#input_msg").val() + "</p><hr>") ;
 				$("#input_msg").val('') ;
 			 }
 		}) ;
@@ -183,6 +187,7 @@ function msg_add_request() {
 $(document).ready(function(){
 	$("#btn_story").click(story_add_request) ;
 	$("#btn_msg").click(msg_add_request) ;
+	console.log($("#title")) ;
 
 	var id = $.urlParam("id") ;
 	if (id != null) {
@@ -192,10 +197,17 @@ $(document).ready(function(){
 		function(data) {
 			var ret = JSON.parse(data) ;
 			var title = ret.story_info[0].title ;
-			$("#text-container").append("<p>标题:" + title + "</p>") ;
+			var t = new Date(ret.story_info[0].time) ;
+			var t_str = t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate() + " " +
+							t.getHours() + ":" + t.getMinutes() + ":" + t.getSeconds() ;
+			$("#title")[0].innerText = title ;
+			$("#story_time")[0].innerText = t_str ;
+			//$("#text-container").append("<p>标题:" + title + "</p>") ;
 			for (var i = 0; i < ret.messages.length; i++) {
 				var content = ret.messages[i].content ;
-				$("#text-container").append("<p>内容:" + content + "</p>") ;
+				var t = new Date(ret.messages[i].time) ;
+				var t_str = t.getFullYear() + "-" + (t.getMonth() + 1) + "-" + t.getDate() + " " + t.getHours() + ":" + t.getMinutes() + ":" + t.getSeconds() ;
+				$("#msg-content").append("<p>" + content + "</p>  <p>" + t_str + "</p><hr>") ;
 			};
 		})
 	}
@@ -208,6 +220,46 @@ $(document).ready(function(){
 
 <div>
 	<div id="text-container"></div>
+
+	<!--  <div class="blog-header">
+	 	<div class="container">
+	 		<h2 class="blog-title">测试标题</h2>
+	 		<p class="lead blog-description">简单介绍</p>
+	 	</div>
+	 </div>
+
+	<div class="container">
+	<div class="row">
+	<div class="col-sm-8 blog-main">
+	<div class="blog-post">
+	<p> 段落测试 <p>
+	<hr>
+
+	</div>
+
+	</div>
+	</div>
+	</div> -->
+
+ <div class="container-narrow">
+    <div class="content">        
+		<div class="page-header">
+  		<h1 id="title">加载中 <small></small></h1>
+  		<hr>
+  		<h4 id="desc">内容简介</h4>
+</div>
+
+<div class="row-fluid post-full">
+  <div class="span12">
+    <div class="date">
+      <span id="story_time">05 April 2015</span>
+    </div>
+    <div class="content">
+      
+<div id="msg-content">
+<!-- <p>程序猿也有很多犯二的时候。</p><hr> -->
+</div>
+
 
 	<div>
 	<input type="text" id="input_msg"  value=""/>
