@@ -163,7 +163,7 @@ function story_add_request() {
 		{"title" : $("#input_story").val()},
 		function(data) {
 			var ret = JSON.parse(data) ;
-			location.href = "http://localhost:3001/index.html?id=" + ret.id ;
+			location.href = "http://" + location.host + "/index.html?id=" + ret.id ;
 		}) ;
 	
 }
