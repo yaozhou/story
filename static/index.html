@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<title>todolist</title> 
+   <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<!-- <script type="text/javascript" src="jquery.js?body=1"></script> 
+ --><link href="bootstrap.css?body=1" rel="stylesheet">
+<script src="bootstrap.js?body=1"></script>
+<script type="text/javascript"> 
+
+$.urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (results == null) return null;
+	return results[1] || null ;
+}
+
+var host = location.protocol + "//" + location.host ;
+
+String.format = function() {
+    var theString = arguments[0];
+    for (var i = 1; i < arguments.length; i++) {
+        var regEx = new RegExp("\\{" + (i - 1) + "\\}", "gm");
+        theString = theString.replace(regEx, arguments[i]);
+    }
+    return theString;
+}
+
+function update_category() {
+	$(nav_tab).empty() ;
+	$.post(host + '/api/category_list',
+		{},
+		function(data) {
+			var rows = JSON.parse(data) ;
+			for (var i = 0; i < rows.length; i++) {
+				category_add_client(rows[i].category, rows[i].id, i==0) ;				
+			};
+			update_item() ;
+		})
+}
+
+function category_add_request() {
+	$.post(host + '/api/story_add',
+		{"category" : $("#category_name").val()},
+		function(data) {
+			 var ret = JSON.parse(data) ;
+			 if (ret.code == 0) {
+			 	//$("#category_name").val('') ;
+			 	//category_add_client(ret.name, ret.id, false) ;
+			 	var text = $("#category_name").val() ;
+				$("#category_name").val('') ;
+				$("#text-container").append("<p>" + text + "</p>") ;
+			 }
+		}) ;
+}
+
+function category_add_client(category_name, category_id, b_active) {
+	var tab_html = String.format(
+				'<li role="presentation" id="tab_{0}"><a href="#pane_{0}" aria-controls="settings" role="tab" data-toggle="pill">{1}</a></li>',
+				category_id, category_name) ;
+	var pane_html = String.format(
+				'<div role="tabpanel" class="tab-pane" id="pane_{0}"> <table class="table table-bordered" border="1" id="table_{0}"></table></div>', category_id) ;
+	var add_item_html = String.format(
+				'<input type="text" id="txt_add_to_categorty_{0}"  value=""/> <input type="button" id="btn_add_to_category_{0}" category_id={0} value="添加事项" type="submit" class="btn"><p><input type="button" id="btn_del_category_{0}" category_id={0} value="删除此分类" type="submit" class="btn">', category_id) ;
+
+	$(nav_tab).append(tab_html) ;
+	$(nav_pane).append(pane_html) ;
+	$("#pane_" + category_id).append(add_item_html) ;
+
+	if (b_active) {
+		$("#tab_"+ category_id).addClass("active") ;
+		$("#pane_" + category_id).addClass("active") ;
+	}
+
+	$("#btn_add_to_category_" + category_id).bind("click", function() {
+		var content = $("#txt_add_to_categorty_" + category_id).val() ;
+		$.post(host + '/api/item_add',
+				{"item" : content, "category" : category_id},
+				function(data) {
+					 var ret = JSON.parse(data) ;
+					 if (ret.code == 0) {
+					 	item_add_client(ret.category_id, content, ret.item_id) ;
+					 	$("#txt_add_to_categorty_" + ret.category_id).val("") ;
+					 }
+				}) ;
+
+	});
+
+	$("#btn_del_category_" + category_id).bind("click", function() {
+		category_del_request(parseInt($(this).attr("category_id"))) ;
+	});
+}
+
+function category_del_client(category_id) {
+	$("#tab_" + category_id).remove() ;
+	$("#pane_" + category_id).remove() ;
+
+}
+
+function category_del_request(category_id) {
+	$.post(host + '/api/category_del',
+			{"id" : category_id},
+			function(data) {
+				 var ret = JSON.parse(data) ;
+				 if (ret.code == 0) {
+				 	category_del_client(ret.id) ;
+				 }
+			}) ;
+}
+
+function item_add_client(category_id, item_name, item_id) {
+	var item_html = String.format(
+		'<tr><td id="item_{0}"><input type="button" value="删除" type="submit" id="btn_{0}" item_id="{0}" category_id="{1}" class="btn"> {2} </td></tr>', 
+			item_id, category_id, item_name) ;
+	$("#table_" + category_id).append(item_html) ;
+
+	$("#btn_" + item_id).bind("click", function() {
+		item_del_request(parseInt($(this).attr("item_id"))) ;
+	});
+}
+
+function item_del_client(id) {
+	$("#item_" + id).remove() ;
+}
+
+function item_del_request(id) {
+	$.post(host + '/api/item_del',
+			{"id" : id },
+			function(data) {
+				var ret = JSON.parse(data) ;
+				if (ret.code == 0) {
+					item_del_client(ret.id) ;
+				}
+			}) ;
+}
+
+function item_add_request(category, item) {
+	$.post(host + '/api/item_add',
+		{"item":item, "category":category},
+		function(data) {
+			 var ret = JSON.parse(data) ;
+			 if (ret.code == 0) {
+			 	item_add_client(category, item) ;
+			 }
+		}) ;
+}
+
+function update_item() {
+
+	$.post(host + '/api/item_list',
+	{},
+	function(data) {
+		var rows = JSON.parse(data) ;
+		for (var i = 0; i < rows.length; i++) {
+			item_add_client(rows[i].category, rows[i].item, rows[i].id) ;
+		}
+	});	
+}
+
+function story_add_request() {	
+	$.post(host + '/api/story_add',
+		{"title" : $("#input_story").val()},
+		function(data) {
+			var ret = JSON.parse(data) ;
+			location.href = "http://localhost:3001/index.html?id=" + ret.id ;
+		}) ;
+	
+}
+
+function msg_add_request() {
+	$.post(host + '/api/msg_add',
+		{"content" : $("#input_msg").val(), "id" : $.urlParam("id") },
+		function(data) {
+			 var ret = JSON.parse(data) ;
+			 if (ret.code == 0) {				
+				$("#text-container").append("<p>内容:" + $("#input_msg").val() + "</p>") ;
+				$("#input_msg").val('') ;
+			 }
+		}) ;
+}
+
+$(document).ready(function(){
+	$("#btn_story").click(story_add_request) ;
+	$("#btn_msg").click(msg_add_request) ;
+
+	var id = $.urlParam("id") ;
+	if (id != null) {
+
+		$.post(host + '/api/story_info',
+		{"id" : id },
+		function(data) {
+			var ret = JSON.parse(data) ;
+			var title = ret.story_info[0].title ;
+			$("#text-container").append("<p>标题:" + title + "</p>") ;
+			for (var i = 0; i < ret.messages.length; i++) {
+				var content = ret.messages[i].content ;
+				$("#text-container").append("<p>内容:" + content + "</p>") ;
+			};
+		})
+	}
+}); 
+
+</script> 
+
+</head> 
+<body> 
+
+<div>
+	<div id="text-container"></div>
+
+	<div>
+	<input type="text" id="input_msg"  value=""/>
+	<input type="button" id="btn_msg" value="添加消息" type="submit" class="btn">
+	</div>
+
+	<div>
+	<input type="text" id="input_story"  value=""/> 
+	<input type="button" id="btn_story" value="添加故事" type="submit" class="btn">
+	</div>
+
+</div>
+
+<div id="container" style="min-width:800px;height:400px;"></div>
+
+
+
+
+</body> 
+</html> 

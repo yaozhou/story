@@ -1,0 +1,55 @@
+<html>
+<head>
+   <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>
+   <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+   <script>
+   	var host='http://106.186.121.34:3001'
+   
+	 $.post(host + '/api/table_query',
+	{"name": "t_population"},
+	function(data) {
+		var rows = JSON.parse(data) ;
+
+		var x = new Array() ;
+		var y_phone = new Array() ;
+		var y_population = new Array() ;
+		for (var i = 0; i < rows.length; i++) {
+			x.push(rows[i].name) ;
+			y_phone.push(rows[i].phone_num) ;
+			y_population.push(rows[i].population) ;
+		};
+
+	    $('#container').highcharts({
+	        chart: {
+	            type: 'column'
+	        },
+	        title: {
+	            text: '人口和移动电话统计'
+	        },
+	        xAxis: {
+	            categories: x
+	        },
+	        yAxis: {
+	            title: {
+	                text: '数量(万)'
+	            }
+	        },
+	        series: [{
+	            name: '移动电话注册数',
+	            data: y_phone
+	        },
+	        {
+	        	name: '户籍人口数',
+	        	data: y_population
+	        }]
+	    });
+
+
+	}) ;
+   </script>
+</head>
+	
+<body>
+   <div id="container" style="min-width:800px;height:400px;"></div>
+</body>
+</html>
