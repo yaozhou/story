@@ -6,20 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="style.css?body=1" rel="stylesheet" type="text/css" media="all">
-<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
-
-<!-- <script type="text/javascript" src="jquery.js?body=1"></script> 
-
- -->
  <link href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
 <link href="data:text/css;charset=utf-8," data-href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css" rel="stylesheet" id="bs-theme-stylesheet">
 
-<!-- <link href="bootstrap.css?body=1" rel="stylesheet"> -->
+<script type="text/javascript" src="jquery-1.8.3.min.js"></script>
 <script src="bootstrap.js?body=1"></script>
-
-
-
 <script type="text/javascript" src="highcharts.js"></script>
+
+
+
 
 <script type="text/javascript"> 
 
@@ -40,145 +35,19 @@ String.format = function() {
     return theString;
 }
 
-function update_category() {
-	$(nav_tab).empty() ;
-	$.post(host + '/api/category_list',
-		{},
-		function(data) {
-			var rows = JSON.parse(data) ;
-			for (var i = 0; i < rows.length; i++) {
-				category_add_client(rows[i].category, rows[i].id, i==0) ;				
-			};
-			update_item() ;
-		})
-}
-
-function category_add_request() {
-	$.post(host + '/api/story_add',
-		{"category" : $("#category_name").val()},
-		function(data) {
-			 var ret = JSON.parse(data) ;
-			 if (ret.code == 0) {
-			 	//$("#category_name").val('') ;
-			 	//category_add_client(ret.name, ret.id, false) ;
-			 	var text = $("#category_name").val() ;
-				$("#category_name").val('') ;
-				//$("#text-container").append("<p>" + text + "</p>") ;
-			 }
-		}) ;
-}
-
-function category_add_client(category_name, category_id, b_active) {
-	var tab_html = String.format(
-				'<li role="presentation" id="tab_{0}"><a href="#pane_{0}" aria-controls="settings" role="tab" data-toggle="pill">{1}</a></li>',
-				category_id, category_name) ;
-	var pane_html = String.format(
-				'<div role="tabpanel" class="tab-pane" id="pane_{0}"> <table class="table table-bordered" border="1" id="table_{0}"></table></div>', category_id) ;
-	var add_item_html = String.format(
-				'<input type="text" id="txt_add_to_categorty_{0}"  value=""/> <input type="button" id="btn_add_to_category_{0}" category_id={0} value="添加事项" type="submit" class="btn"><p><input type="button" id="btn_del_category_{0}" category_id={0} value="删除此分类" type="submit" class="btn">', category_id) ;
-
-	$(nav_tab).append(tab_html) ;
-	$(nav_pane).append(pane_html) ;
-	$("#pane_" + category_id).append(add_item_html) ;
-
-	if (b_active) {
-		$("#tab_"+ category_id).addClass("active") ;
-		$("#pane_" + category_id).addClass("active") ;
-	}
-
-	$("#btn_add_to_category_" + category_id).bind("click", function() {
-		var content = $("#txt_add_to_categorty_" + category_id).val() ;
-		$.post(host + '/api/item_add',
-				{"item" : content, "category" : category_id},
-				function(data) {
-					 var ret = JSON.parse(data) ;
-					 if (ret.code == 0) {
-					 	item_add_client(ret.category_id, content, ret.item_id) ;
-					 	$("#txt_add_to_categorty_" + ret.category_id).val("") ;
-					 }
-				}) ;
-
-	});
-
-	$("#btn_del_category_" + category_id).bind("click", function() {
-		category_del_request(parseInt($(this).attr("category_id"))) ;
-	});
-}
-
-function category_del_client(category_id) {
-	$("#tab_" + category_id).remove() ;
-	$("#pane_" + category_id).remove() ;
-
-}
-
-function category_del_request(category_id) {
-	$.post(host + '/api/category_del',
-			{"id" : category_id},
-			function(data) {
-				 var ret = JSON.parse(data) ;
-				 if (ret.code == 0) {
-				 	category_del_client(ret.id) ;
-				 }
-			}) ;
-}
-
-function item_add_client(category_id, item_name, item_id) {
-	var item_html = String.format(
-		'<tr><td id="item_{0}"><input type="button" value="删除" type="submit" id="btn_{0}" item_id="{0}" category_id="{1}" class="btn"> {2} </td></tr>', 
-			item_id, category_id, item_name) ;
-	$("#table_" + category_id).append(item_html) ;
-
-	$("#btn_" + item_id).bind("click", function() {
-		item_del_request(parseInt($(this).attr("item_id"))) ;
-	});
-}
-
-function item_del_client(id) {
-	$("#item_" + id).remove() ;
-}
-
-function item_del_request(id) {
-	$.post(host + '/api/item_del',
-			{"id" : id },
-			function(data) {
-				var ret = JSON.parse(data) ;
-				if (ret.code == 0) {
-					item_del_client(ret.id) ;
-				}
-			}) ;
-}
-
-function item_add_request(category, item) {
-	$.post(host + '/api/item_add',
-		{"item":item, "category":category},
-		function(data) {
-			 var ret = JSON.parse(data) ;
-			 if (ret.code == 0) {
-			 	item_add_client(category, item) ;
-			 }
-		}) ;
-}
-
-function update_item() {
-
-	$.post(host + '/api/item_list',
-	{},
-	function(data) {
-		var rows = JSON.parse(data) ;
-		for (var i = 0; i < rows.length; i++) {
-			item_add_client(rows[i].category, rows[i].item, rows[i].id) ;
-		}
-	});	
-}
-
-function story_add_request() {	
-	$.post(host + '/api/story_add',
+function story_add_request() {
+	var s = $("#input_story").val() ;
+	if (s.replace(/(^\s*)|(\s*$)/g, "").length ==0)
+	{
+   		alert('亲，标题不能为空');
+	}else {
+		$.post(host + '/api/story_add',
 		{"title" : $("#input_story").val()},
 		function(data) {
 			var ret = JSON.parse(data) ;
 			location.href = "http://" + location.host + "/index.html?id=" + ret.id ;
-		}) ;
-	
+		}) ;		
+	}	
 }
 
 function msg_add_request() {
@@ -222,74 +91,34 @@ $(document).ready(function(){
 		})
 	}
 }); 
-</script> 
 
+</script>
 </head> 
-<body> 
 
-<div>
-
- <div class="container-narrow">
-    <div class="content">        
-		<div class="page-header">
-  		<h1 id="title">加载中 <small></small></h1>
-  		<p id="story_time" class='text-right'>time</p>
-	</div>
-</div>
-
-
-<div style="display:none;"> <img  width="700" height="700" src="http://115.29.164.142:3002/zailushang.png"  alt="在路上" /> </div>
-      
-      
-	<div id="msg-content">
-		
-	</div>
-
-<textarea id="input_msg" class="form-control" rows="3" placeholder="然后.."></textarea>
-
-<!-- <input class="form-control input-lg" type="text" placeholder=".input-lg">
-<input class="form-control" type="text" placeholder="Default input">
-<input class="form-control input-sm" type="text" placeholder=".input-sm">
- -->
-<button type="submit" class="btn btn-default" id="btn_msg" >继续接龙</button>
-
-	<div>
-
-
-	<hr>
-<!-- 	<input type="text" id="input_story"  value=""/> -->
-	<input type="text" class="form-control" id="input_story" placeholder="标题">
-	<button type="submit" id="btn_story" class="btn btn-default" id="btn_msg">写我的新故事</button>
-	</div>
-
+<body>
 	
+	 <div class="container-narrow">
+	    <div class="content">        
+			<div class="page-header">
+		  		<h1 id="title">加载中 <small></small></h1>
+		  		<p id="story_time" class='text-right'>time</p>
+			</div>
+		</div>
 
-	<!-- <form class="form-horizontal">
-  <div class="form-group">
-    <label  class="text-left">标题</label>
-    <div class="col-sm-10">
-      <input type="text" class="form-control" placeholder="Text input">
-  </div>
-  <div class="form-group">
-    <label for="inputPassword3" class="col-sm-2 control-label">要求</label>
-    <div class="col-sm-10">
-      <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
-    </div>
-  </div> 
-  <div class="form-group">
-    <div class="col-sm-offset-2 col-sm-10">
-      <button type="submit" class="btn btn-default">Sign in</button>
-    </div>
-  </div>
-</form> -->
+		<div style="display:none;"> <img  width="700" height="700" src="http://115.29.164.142:3002/zailushang.png"  alt="在路上" /> </div>
+		<!-- <div style="display:none;"> <img src="zailushang.jpg"  alt="在路上" /> </div> -->
+	           
+		<div id="msg-content"></div>
 
-	<!-- <p class='text-right'>Right aligned text.</p> -->
-
-
-
-
-
-
+		<textarea id="input_msg" class="form-control" rows="3" placeholder="然后.."></textarea>
+		<button type="submit" class="btn btn-default" id="btn_msg" >继续接龙</button>
+		<h6>没有人接龙？点击右上角发送到朋友圈，让你的朋友来续写你的故事哦</h6>
+		<div>
+			<hr>
+			<input type="text" class="form-control" id="input_story" placeholder="标题">
+			<button type="submit" id="btn_story" class="btn btn-default" id="btn_msg">写我的新故事</button>
+		</div>
+	</div>
 
 </body> 
 </html> 
