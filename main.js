@@ -1,8 +1,10 @@
 var express = require('express');
 var app = express();
+var morgan = require("morgan") ;
 var bodyParser = require('body-parser');
 var util = require('util') ;
-
+var fs = require('fs') ;
+ 
 
 //create database story;
 //create table story (id INT auto_increment, title varchar(1024), time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, primary key(id)) DEFAULT CHARSET=utf8;
@@ -28,6 +30,9 @@ function query(sql, fun) {
 query("SET character_set_client=utf8,character_set_connection=utf8") ;
 
 app.use(express.static('static'));
+
+var accessLogStream = fs.createWriteStream(__dirname + '/access.log', {flags: 'a'})
+app.use(morgan('combined', {stream: accessLogStream})) ;
 
 app.use(bodyParser.json('1mb'));  //body-parser ½âÎöjson¸ñÊ½Êý¾Ý
 app.use(bodyParser.urlencoded({            //´ËÏî±ØÐëÔÚ bodyParser.json ÏÂÃæ,Îª²ÎÊý±àÂë
